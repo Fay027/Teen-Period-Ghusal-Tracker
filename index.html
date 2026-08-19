@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>My Cycle Tracker</title>
+<meta name="description" content="A gentle, private cycle tracker built just for you.">
+<meta name="theme-color" content="#FBF7F2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cycle Tracker">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%237C8A64'/%3E%3Cpath d='M50 78 V42' stroke='%23FBF7F2' stroke-width='4' stroke-linecap='round'/%3E%3Cellipse cx='38' cy='40' rx='14' ry='9' fill='%23FBF7F2' transform='rotate(-30 38 40)'/%3E%3Cellipse cx='62' cy='34' rx='14' ry='9' fill='%23FBF7F2' transform='rotate(25 62 34)'/%3E%3Cellipse cx='50' cy='22' rx='13' ry='8.5' fill='%23FBF7F2' transform='rotate(-4 50 22)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FBF7F2;
+    --surface: #FFFFFF;
+    --surface-alt: #F3EDE3;
+    --text: #4A4038;
+    --text-soft: #8B7F72;
+    --text-faint: #B3A99C;
+    --olive: #7C8A64;
+    --olive-dark: #586447;
+    --olive-pale: #E7EBDE;
+    --blush: #E2A29D;
+    --blush-dark: #C97C79;
+    --blush-pale: #F7E4E1;
+    --gold: #D9A96B;
+    --gold-pale: #F6E9D4;
+    --border: #E9E0D2;
+    --radius-lg: 26px;
+    --radius-md: 18px;
+    --radius-sm: 12px;
+    --shadow-soft: 0 6px 20px rgba(74, 64, 56, 0.07);
+    --shadow-lift: 0 10px 30px rgba(74, 64, 56, 0.14);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100vh;
+    padding-bottom: 84px;
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin: 0;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .app-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg);
+    position: relative;
+  }
+
+  @media (min-width: 620px) {
+    .app-shell {
+      max-width: 560px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-lift);
+      min-height: 100vh;
+    }
+  }
+
+  /* ---------- Header ---------- */
+  .app-header {
+    padding: 22px 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+  }
+
+  .brand-text h1 {
+    font-size: 1.28rem;
+    line-height: 1.1;
+  }
+
+  .brand-text p {
+    margin: 2px 0 0;
+    font-size: 0.72rem;
+    color: var(--text-soft);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .settings-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-soft);
+  }
+  .settings-btn svg { width: 19px; height: 19px; stroke: var(--olive-dark); }
+
+  /* ---------- Tabs ---------- */
+  .tabbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+    z-index: 40;
+  }
+  @media (min-width: 620px) { .tabbar { max-width: 560px; } }
+
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 2px;
+    border-radius: var(--radius-sm);
+    color: var(--text-faint);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    transition: color 0.15s ease;
+  }
+  .tab-btn svg { width: 21px; height: 21px; stroke: currentColor; fill: none; }
+  .tab-btn.active { color: var(--olive-dark); }
+  .tab-btn.active .tab-dot { opacity: 1; transform: scale(1); }
+  .tab-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--blush-dark);
+    opacity: 0; transform: scale(0);
+    transition: all 0.15s ease;
+  }
+
+  .view { display: none; padding: 4px 20px 28px; animation: fadeIn 0.25s ease; }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- Insight card ---------- */
+  .insight-card {
+    background: linear-gradient(135deg, var(--olive-dark), var(--olive));
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    color: #fff;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .insight-card::after {
+    content: "";
+    position: absolute;
+    right: -30px; top: -30px;
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .insight-top { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; font-weight: 700; }
+  .insight-main { font-family: 'Fraunces', serif; font-size: 1.85rem; margin: 4px 0 2px; font-weight: 500; }
+  .insight-sub { font-size: 0.85rem; opacity: 0.9; }
+  .insight-stats {
+    display: flex;
+    gap: 14px;
+    margin-top: 16px;
+    position: relative;
+  }
+  .insight-stat { flex: 1; background: rgba(255,255,255,0.14); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .insight-stat .num { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 600; display: block; }
+  .insight-stat .lbl { font-size: 0.66rem; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.03em; }
+
+  /* ---------- Calendar ---------- */
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .cal-nav-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cal-nav-btn svg { width: 16px; height: 16px; stroke: var(--olive-dark); }
+  .cal-month-label { font-size: 1.15rem; text-align: center; }
+  .cal-today-link {
+    display: block;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--olive-dark);
+    font-weight: 700;
+    text-decoration: none;
+    margin: -4px 0 14px;
+    cursor: pointer;
+  }
+
+  .cal-weekdays, .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .cal-weekdays div {
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--text-faint);
+    font-weight: 800;
+    padding-bottom: 6px;
+    text-transform: uppercase;
+  }
+  .cal-grid { gap: 4px; }
+
+  .cal-day {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    z-index: 1;
+  }
+  .cal-day.empty { visibility: hidden; }
+  .cal-day .day-fill {
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    z-index: -1;
+  }
+  .cal-day.period .day-fill { background: var(--blush); }
+  .cal-day.period { color: #fff; }
+  .cal-day.predicted-period .day-fill { border: 2px dashed var(--blush-dark); background: var(--blush-pale); }
+  .cal-day.fertile .day-fill { background: var(--gold-pale); border: 1.5px solid var(--gold); }
+  .cal-day.symptom-only::before {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--olive);
+  }
+  .cal-day.has-note::after {
+    content: "";
+    position: absolute;
+    top: 4px; right: 8px;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--olive-dark);
+  }
+  .cal-day.today .day-fill { box-shadow: inset 0 0 0 2px var(--olive-dark); border-radius: 50%; }
+  .cal-day.outside-month { opacity: 0.32; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin: 16px 0 4px;
+    font-size: 0.72rem;
+    color: var(--text-soft);
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 50%; }
+
+  .section-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-soft);
+    font-weight: 800;
+    margin: 22px 0 10px;
+  }
+
+  /* ---------- Log list ---------- */
+  .log-entry {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+  }
+  .log-entry .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; background: var(--blush); }
+  .log-entry .info { flex: 1; min-width: 0; }
+  .log-entry .date-str { font-weight: 700; font-size: 0.88rem; }
+  .log-entry .meta { font-size: 0.76rem; color: var(--text-soft); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .empty-state {
+    text-align: center;
+    padding: 26px 14px;
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    background: var(--surface-alt);
+    border-radius: var(--radius-md);
+  }
+
+  /* ---------- Bottom sheet ---------- */
+  .sheet-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(74,64,56,0.35);
+    z-index: 60;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+
+  .sheet {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--surface);
+    border-radius: 26px 26px 0 0;
+    padding: 10px 22px calc(24px + env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(.32,.72,0,1);
+    z-index: 61;
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 -10px 30px rgba(74,64,56,0.18);
+  }
+  @media (min-width: 620px) { .sheet { max-width: 560px; } }
+  .sheet.open { transform: translateY(0); }
+
+  .sheet-handle { width: 40px; height: 4px; background: var(--border); border-radius: 3px; margin: 8px auto 14px; }
+  .sheet-title { font-size: 1.2rem; margin-bottom: 2px; }
+  .sheet-subtitle { font-size: 0.8rem; color: var(--text-soft); margin-bottom: 18px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface-alt);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .toggle-row-label { font-weight: 700; font-size: 0.92rem; }
+  .toggle-row-sub { font-size: 0.74rem; color: var(--text-soft); margin-top: 1px; }
+
+  .switch { position: relative; width: 46px; height: 27px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-track {
+    position: absolute; inset: 0; background: #DDD3C4; border-radius: 20px;
+    transition: background 0.18s ease; cursor: pointer;
+  }
+  .switch-track::before {
+    content: ""; position: absolute; left: 3px; top: 3px;
+    width: 21px; height: 21px; background: #fff; border-radius: 50%;
+    transition: transform 0.18s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+  .switch input:checked + .switch-track { background: var(--blush-dark); }
+  .switch input:checked + .switch-track::before { transform: translateX(19px); }
+
+  .field-label { font-weight: 700; font-size: 0.85rem; margin-bottom: 8px; display: block; }
+
+  .chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .chip {
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-soft);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .chip.selected {
+    background: var(--olive-pale);
+    border-color: var(--olive);
+    color: var(--olive-dark);
+  }
+
+  textarea.note-input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    resize: vertical;
+    min-height: 70px;
+    background: var(--surface-alt);
+    color: var(--text);
+    margin-bottom: 18px;
+  }
+  textarea.note-input::placeholder { color: var(--text-faint); }
+
+  .sheet-actions { display: flex; gap: 10px; }
+
+  .btn {
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 13px 16px;
+    font-weight: 800;
+    font-size: 0.88rem;
+    flex: 1;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-primary { background: var(--olive-dark); color: #fff; }
+  .btn-ghost { background: var(--surface-alt); color: var(--text); }
+  .btn-danger { background: var(--blush-pale); color: var(--blush-dark); }
+  .btn svg { width: 16px; height: 16px; }
+
+  /* ---------- Ghusl ---------- */
+  .ghusl-intro {
+    background: var(--olive-pale);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  .ghusl-intro h2 { font-size: 1.15rem; margin-bottom: 6px; }
+  .ghusl-intro p { font-size: 0.85rem; color: var(--olive-dark); line-height: 1.5; margin: 0; }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--surface-alt);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blush-dark), var(--gold));
+    border-radius: 6px;
+    transition: width 0.3s ease;
+    width: 0%;
+  }
+
+  .ghusl-step {
+    display: flex;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .ghusl-step.checked { background: var(--olive-pale); border-color: var(--olive); }
+
+  .step-check {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface);
+  }
+  .ghusl-step.checked .step-check { background: var(--olive-dark); border-color: var(--olive-dark); }
+  .step-check svg { width: 13px; height: 13px; stroke: #fff; opacity: 0; transition: opacity 0.15s ease; }
+  .ghusl-step.checked .step-check svg { opacity: 1; }
+
+  .step-text .step-title { font-weight: 800; font-size: 0.9rem; margin-bottom: 2px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .step-text .step-desc { font-size: 0.8rem; color: var(--text-soft); line-height: 1.45; }
+  .ghusl-step.checked .step-title { text-decoration: line-through; text-decoration-color: var(--olive); }
+
+  .sunnah-badge {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 800;
+    color: var(--gold);
+    background: var(--gold-pale);
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-decoration: none !important;
+  }
+
+  .step-number {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--olive-pale);
+    color: var(--olive-dark);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 0.82rem;
+  }
+
+  .dua-box {
+    background: var(--surface-alt);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-top: 8px;
+  }
+  .dua-box .dua-arabic { font-size: 0.9rem; font-style: italic; color: var(--olive-dark); font-weight: 700; margin-bottom: 3px; }
+  .dua-box .dua-meaning { font-size: 0.78rem; color: var(--text-soft); line-height: 1.5; }
+
+  .ghusl-done-banner {
+    text-align: center;
+    background: linear-gradient(135deg, var(--blush-dark), var(--gold));
+    color: #fff;
+    padding: 20px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 16px;
+    display: none;
+  }
+  .ghusl-done-banner.show { display: block; }
+  .ghusl-done-banner .display { color: #fff; font-size: 1.1rem; margin-bottom: 4px; }
+  .ghusl-done-banner p { margin: 0; font-size: 0.8rem; opacity: 0.92; }
+
+  /* ---------- Learn accordion ---------- */
+  .accordion-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .accordion-head {
+    width: 100%;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 16px;
+    text-align: left;
+  }
+  .accordion-icon-wrap {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--olive-pale);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .accordion-icon-wrap svg { width: 17px; height: 17px; stroke: var(--olive-dark); fill: none; }
+  .accordion-head .a-title { font-weight: 800; font-size: 0.92rem; flex: 1; }
+  .accordion-chevron { width: 15px; height: 15px; stroke: var(--text-soft); transition: transform 0.2s ease; flex-shrink: 0; }
+  .accordion-item.open .accordion-chevron { transform: rotate(180deg); }
+  .accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+  }
+  .accordion-body-inner {
+    padding: 0 16px 18px 64px;
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    line-height: 1.6;
+  }
+  .accordion-body-inner ul { margin: 8px 0 0; padding-left: 18px; }
+  .accordion-body-inner li { margin-bottom: 5px; }
+
+  .note-box {
+    background: var(--gold-pale);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    font-size: 0.82rem;
+    color: #6B5433;
+    line-height: 1.55;
+    margin-top: 4px;
+    margin-bottom: 10px;
+  }
+  .note-box strong { display: block; margin-bottom: 4px; color: #6B5433; }
+
+  /* ---------- Settings sheet ---------- */
+  .settings-field { margin-bottom: 16px; }
+  .settings-field label { font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 6px; }
+  .settings-field input[type="number"] {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    background: var(--surface-alt);
+    color: var(--text);
+  }
+  .settings-hint { font-size: 0.74rem; color: var(--text-faint); margin-top: 5px; }
+
+  /* ---------- Footer ---------- */
+  .app-footer {
+    text-align: center;
+    padding: 30px 20px 10px;
+    color: var(--text-faint);
+  }
+  .app-footer .footer-mark { width: 30px; height: 30px; margin: 0 auto 8px; display: block; }
+  .app-footer .footer-mark svg { stroke: var(--olive); }
+  .app-footer p { margin: 0; font-size: 0.72rem; letter-spacing: 0.02em; }
+  .app-footer .studio { font-weight: 700; color: var(--olive-dark); }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 96px;
+    transform: translate(-50%, 12px);
+    background: var(--text);
+    color: #fff;
+    padding: 11px 20px;
+    border-radius: 30px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    box-shadow: var(--shadow-lift);
+    z-index: 80;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <header class="app-header">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="24" fill="#7C8A64"/>
+        <path d="M50 78 V42" stroke="#FBF7F2" stroke-width="4.5" stroke-linecap="round"/>
+        <ellipse cx="37" cy="40" rx="15" ry="9.5" fill="#FBF7F2" transform="rotate(-30 37 40)"/>
+        <ellipse cx="63" cy="34" rx="15" ry="9.5" fill="#FBF7F2" transform="rotate(25 63 34)"/>
+        <ellipse cx="50" cy="21" rx="13.5" ry="9" fill="#FBF7F2" transform="rotate(-4 50 21)"/>
+      </svg>
+      <div class="brand-text">
+        <h1>My Cycle Tracker</h1>
+        <p>gentle and just for you</p>
+      </div>
+    </div>
+    <button class="settings-btn" id="openSettingsBtn" aria-label="Open settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    </button>
+  </header>
+
+  <!-- ===================== CALENDAR VIEW ===================== -->
+  <main class="view active" id="view-calendar">
+    <div class="insight-card">
+      <div class="insight-top" id="insightTop">Cycle day</div>
+      <div class="insight-main" id="insightMain">Day 1</div>
+      <div class="insight-sub" id="insightSub">Log your period start to begin tracking.</div>
+      <div class="insight-stats">
+        <div class="insight-stat">
+          <span class="num" id="statNextPeriod">--</span>
+          <span class="lbl">Next period</span>
+        </div>
+        <div class="insight-stat">
+          <span class="num" id="statAvgCycle">28d</span>
+          <span class="lbl">Avg cycle</span>
+        </div>
+        <div class="insight-stat">
+          <span class="num" id="statAvgPeriod">5d</span>
+          <span class="lbl">Avg period</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cal-nav">
+      <button class="cal-nav-btn" id="prevMonthBtn" aria-label="Previous month">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <h2 class="cal-month-label" id="calMonthLabel">Month Year</h2>
+      <button class="cal-nav-btn" id="nextMonthBtn" aria-label="Next month">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+    <span class="cal-today-link" id="jumpTodayBtn">Jump to today</span>
+
+    <div class="cal-weekdays">
+      <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--blush)"></span>Period</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--blush-pale); border:2px dashed var(--blush-dark)"></span>Predicted period</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--gold-pale); border:1.5px solid var(--gold)"></span>Fertile window</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--olive)"></span>Symptom noted</div>
+    </div>
+
+    <div class="section-label">Recent logs</div>
+    <div id="recentLogsList"></div>
+  </main>
+
+  <!-- ===================== WUDHU VIEW ===================== -->
+  <main class="view" id="view-wudhu">
+    <div class="ghusl-intro">
+      <h2>How to make wudhu</h2>
+      <p>Wudhu is the washing you do before prayer, and it is also one of the steps inside ghusl. Once you know these steps well, they become second nature. Go through them in order, at your own pace.</p>
+    </div>
+    <div id="wudhuStepsList"></div>
+  </main>
+
+  <!-- ===================== GHUSL VIEW ===================== -->
+  <main class="view" id="view-ghusl">
+    <div class="ghusl-intro">
+      <h2>Ghusl checklist</h2>
+      <p>Ghusl is the full wash you do once your period has ended, so you are clean and ready to pray again. It can feel like a lot to remember at first, so this checklist walks you through it one small step at a time. There is no need to rush, take all the time you need.</p>
+    </div>
+
+    <div class="note-box" id="showerNote">
+      <strong>Using a shower</strong>
+      The steps below describe the traditional way of pouring water, which is the sunnah method. If you are standing in a shower instead, you do not need to follow that exact order. What matters most is that water reaches every part of your body and the roots of your hair, so let the water run over your whole body and be extra mindful of spots that get missed, like behind your ears, your hairline, underarms, navel, and between your fingers and toes. If you are ever unsure, it is always okay to ask a parent or trusted adult.
+    </div>
+
+    <div class="ghusl-done-banner" id="ghuslDoneBanner">
+      <div class="display">All steps complete</div>
+      <p>Well done. You can reset this checklist any time you need it again.</p>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="ghuslProgressFill"></div></div>
+
+    <div id="ghuslStepsList"></div>
+
+    <button class="btn btn-ghost" id="resetGhuslBtn" style="width:100%; margin-top:8px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+      Reset checklist
+    </button>
+  </main>
+
+  <!-- ===================== LEARN VIEW ===================== -->
+  <main class="view" id="view-learn">
+    <div class="section-label" style="margin-top:6px;">Cycle basics and self-care</div>
+    <div id="accordionList"></div>
+  </main>
+
+  <footer class="app-footer">
+    <span class="footer-mark">
+      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 88 V38" stroke-width="4" stroke-linecap="round"/>
+        <ellipse cx="35" cy="36" rx="14" ry="9" transform="rotate(-30 35 36)"/>
+        <ellipse cx="65" cy="30" rx="14" ry="9" transform="rotate(25 65 30)"/>
+        <ellipse cx="50" cy="17" rx="12.5" ry="8" transform="rotate(-4 50 17)"/>
+      </svg>
+    </span>
+    <p>Built with love by <span class="studio">Build &amp; Bloom by Fay's Journey</span></p>
+  </footer>
+</div>
+
+<!-- ===================== BOTTOM TAB BAR ===================== -->
+<nav class="tabbar">
+  <button class="tab-btn active" data-view="calendar" aria-label="Calendar">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+    <span class="tab-dot"></span>
+    Calendar
+  </button>
+  <button class="tab-btn" data-view="wudhu" aria-label="How to make wudhu">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.09 3 12.25c0 2.22 1.8 4.05 4 4.05z"></path><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"></path></svg>
+    <span class="tab-dot"></span>
+    Wudhu
+  </button>
+  <button class="tab-btn" data-view="ghusl" aria-label="Ghusl checklist">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69s5 5.6 5 9.31a5 5 0 0 1-10 0c0-3.71 5-9.31 5-9.31z"></path></svg>
+    <span class="tab-dot"></span>
+    Ghusl
+  </button>
+  <button class="tab-btn" data-view="learn" aria-label="Learn">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+    <span class="tab-dot"></span>
+    Learn
+  </button>
+</nav>
+
+<!-- ===================== DAY LOG SHEET ===================== -->
+<div class="sheet-backdrop" id="daySheetBackdrop"></div>
+<div class="sheet" id="daySheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="sheet-handle"></div>
+  <h3 class="sheet-title" id="sheetTitle">Tuesday, Jan 1</h3>
+  <p class="sheet-subtitle" id="sheetSubtitle">Log how this day is going.</p>
+
+  <div class="toggle-row">
+    <div>
+      <div class="toggle-row-label">Period day</div>
+      <div class="toggle-row-sub">Mark this as a day of your period</div>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="periodToggle">
+      <span class="switch-track"></span>
+    </label>
+  </div>
+
+  <label class="field-label">Symptoms</label>
+  <div class="chip-grid" id="symptomChips"></div>
+
+  <label class="field-label" for="noteInput">Note</label>
+  <textarea class="note-input" id="noteInput" placeholder="Anything you want to remember about today"></textarea>
+
+  <div class="sheet-actions">
+    <button class="btn btn-danger" id="clearDayBtn">Clear day</button>
+    <button class="btn btn-primary" id="saveDayBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      Save
+    </button>
+  </div>
+</div>
+
+<!-- ===================== SETTINGS SHEET ===================== -->
+<div class="sheet-backdrop" id="settingsSheetBackdrop"></div>
+<div class="sheet" id="settingsSheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+  <div class="sheet-handle"></div>
+  <h3 class="sheet-title" id="settingsTitle">Settings</h3>
+  <p class="sheet-subtitle">These help make your predictions more accurate.</p>
+
+  <div class="settings-field">
+    <label for="avgCycleInput">Average cycle length (days)</label>
+    <input type="number" id="avgCycleInput" min="18" max="45">
+    <div class="settings-hint">Counted from the first day of one period to the first day of the next.</div>
+  </div>
+  <div class="settings-field">
+    <label for="avgPeriodInput">Average period length (days)</label>
+    <input type="number" id="avgPeriodInput" min="1" max="14">
+    <div class="settings-hint">This updates automatically once you log a few periods, but you can adjust it any time.</div>
+  </div>
+
+  <div class="sheet-actions" style="margin-top: 4px;">
+    <button class="btn btn-danger" id="clearAllDataBtn">Erase all data</button>
+    <button class="btn btn-primary" id="saveSettingsBtn">Save</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Saved</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------------------------------------------------
+     STORAGE
+  --------------------------------------------------------- */
+  var STORAGE_KEY = "myCycleTrackerData";
+
+  var SYMPTOM_LIST = [
+    "Cramps", "Headache", "Bloating", "Fatigue",
+    "Mood swings", "Backache", "Acne", "Tender chest", "Nausea"
+  ];
+
+  var GHUSL_STEPS = [
+    {
+      title: "Trim your nails",
+      sunnah: true,
+      desc: "If your nails need it, this is a good time to trim them. This step is sunnah, meaning it is recommended and good practice, but it will not affect whether your ghusl counts."
+    },
+    {
+      title: "Remove underarm and pubic hair",
+      sunnah: true,
+      desc: "If you remove hair from these areas, now is a good time to do so. This is also sunnah rather than required, so only do it if it is something you and your family already practice."
+    },
+    {
+      title: "Make the intention",
+      desc: "Quietly set the intention in your heart that you are performing ghusl to purify yourself from your period, for the sake of Allah. No words are required, a sincere intention in your heart is enough. Some girls like to also say it quietly, so here is a simple version if that helps you.",
+      dua: {
+        arabic: "Nawaytu al ghusla liraf il hadathil akbar.",
+        meaning: "I intend to perform ghusl to purify myself from major impurity."
+      }
+    },
+    {
+      title: "Wash your hands",
+      desc: "Wash both hands up to the wrist three times before touching anything else."
+    },
+    {
+      title: "Wash the private areas",
+      desc: "Clean the private areas thoroughly with your left hand and remove any traces of blood."
+    },
+    {
+      title: "Perform wudu",
+      desc: "Complete a full wudu as you would before prayer, leaving your feet until the end if you are washing in a tub. Not sure how? The Wudhu tab walks you through it step by step."
+    },
+    {
+      title: "Pour water over your head three times",
+      desc: "Make sure the water reaches the roots of your hair and your scalp. Run your fingers through your hair to help the water in. In the shower instead? You do not need to pour three separate times, just make sure your whole head and hair roots get properly wet."
+    },
+    {
+      title: "Pour water over the right side of your body",
+      desc: "Pour water three times over your right shoulder and let it flow down your whole right side. In the shower instead? Just make sure the water runs over the whole right side of your body."
+    },
+    {
+      title: "Pour water over the left side of your body",
+      desc: "Pour water three times over your left shoulder and let it flow down your whole left side. In the shower instead? Just make sure the water runs over the whole left side of your body."
+    },
+    {
+      title: "Rinse the rest of your body",
+      desc: "Make sure water reaches every part of your body, including your ears, navel, underarms, and between your toes."
+    },
+    {
+      title: "Finish washing your feet",
+      desc: "If you left your feet until the end, wash them now, making sure water passes between your toes."
+    }
+  ];
+
+  var WUDHU_STEPS = [
+    {
+      title: "Make the intention",
+      desc: "Quietly intend in your heart that you are making wudu for prayer."
+    },
+    {
+      title: "Say Bismillah",
+      desc: "Begin by saying Bismillah, meaning in the name of Allah."
+    },
+    {
+      title: "Wash your hands",
+      desc: "Wash both hands up to the wrist three times, making sure water gets between your fingers."
+    },
+    {
+      title: "Rinse your mouth",
+      desc: "Take water into your mouth and swish it around gently, three times."
+    },
+    {
+      title: "Rinse your nose",
+      desc: "Sniff a little water gently into your nostrils and then breathe it back out, three times."
+    },
+    {
+      title: "Wash your face",
+      desc: "Wash your whole face three times, from your hairline to your chin, and from ear to ear."
+    },
+    {
+      title: "Wash your arms",
+      desc: "Wash your right arm three times from your fingertips to your elbow, then do the same on your left arm."
+    },
+    {
+      title: "Wipe your head",
+      desc: "Wet your hands and wipe them over your head once, from the front to the back and then forward again."
+    },
+    {
+      title: "Wipe your ears",
+      desc: "With the same water, wipe the inside and outside of both ears using your fingers."
+    },
+    {
+      title: "Wash your feet",
+      desc: "Wash your right foot three times up to the ankle, making sure water passes between your toes, then do the same on your left foot."
+    }
+  ];
+
+  var LEARN_SECTIONS = [
+    {
+      title: "What is happening in my body",
+      icon: 'M12 21s-8-4.5-8-11a8 8 0 0 1 16 0c0 6.5-8 11-8 11z',
+      body: "Your menstrual cycle is your body's way of preparing for a possible pregnancy each month. It is counted from the first day of one period to the first day of the next, and a typical cycle can range from about 21 to 35 days. There is no single normal number, your own rhythm is the one that matters most for you." +
+        "<ul><li>Menstruation, when the lining of the uterus sheds, usually lasts 3 to 7 days.</li><li>The follicular phase overlaps with your period and continues as your body prepares an egg.</li><li>Ovulation happens roughly two weeks before your next period, when an egg is released.</li><li>The luteal phase follows, and if pregnancy does not happen, your period begins again.</li></ul>"
+    },
+    {
+      title: "What counts as a normal cycle",
+      icon: 'M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11',
+      body: "It is common for cycles to be irregular for the first couple of years after your period starts, so try not to worry if yours is not perfectly predictable yet." +
+        "<ul><li>Cycle length between 21 and 45 days is common for teens.</li><li>Period length of 2 to 7 days is typical.</li><li>Light spotting between periods can happen occasionally.</li></ul>" +
+        "If your periods are extremely painful, extremely heavy, or missing for several months in a row, it is worth mentioning to a trusted adult or doctor."
+    },
+    {
+      title: "Easing cramps and discomfort",
+      icon: 'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z',
+      body: "Cramps happen because the uterus is squeezing to help shed its lining, and a little discomfort is very normal. A few gentle things can help." +
+        "<ul><li>A warm compress or hot water bottle on your lower belly.</li><li>Gentle stretching or a slow walk.</li><li>Staying hydrated and eating balanced meals.</li><li>Extra rest on the days you need it, your body is working hard.</li></ul>"
+    },
+    {
+      title: "Tracking symptoms and moods",
+      icon: 'M12 20l9-16H3l9 16z',
+      body: "Moods can shift around your cycle because of natural changes in hormones, and that is completely normal. Writing down how you feel each day can help you notice your own patterns over time, so you know what to expect and can plan ahead for busy or important days." +
+        "<ul><li>Try logging a symptom or two, even on days without your period.</li><li>Notice if certain days tend to feel harder, and be extra gentle with yourself then.</li><li>Patterns often become clearer after two or three cycles of tracking.</li></ul>"
+    },
+    {
+      title: "Products and hygiene basics",
+      icon: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
+      body: "There are several options for managing your period, and it is completely up to you which feels most comfortable." +
+        "<ul><li>Pads sit inside your underwear and are a gentle option to start with.</li><li>Change pads roughly every 4 to 6 hours, more often on heavier days.</li><li>Wash your hands before and after changing products.</li><li>A light daily shower helps you feel fresh and comfortable.</li></ul>"
+    },
+    {
+      title: "When to talk to a trusted adult or doctor",
+      icon: 'M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0',
+      body: "It is always okay to ask for help or reassurance, and there is nothing to feel shy about. Consider reaching out if you notice any of the following." +
+        "<ul><li>Your period has not started by age 16.</li><li>Bleeding is so heavy you soak through a pad within an hour.</li><li>Pain is severe enough to stop you from going about your day.</li><li>Your period lasts longer than about 7 days.</li><li>You have not had a period for 3 months or more after your cycle was established.</li></ul>" +
+        "A parent, older sibling, school nurse, or doctor would all rather hear from you early than have you worry alone."
+    }
+  ];
+
+  function loadData() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        parsed.logs = parsed.logs || {};
+        parsed.settings = parsed.settings || {};
+        parsed.settings.avgCycleLength = parsed.settings.avgCycleLength || 28;
+        parsed.settings.avgPeriodLength = parsed.settings.avgPeriodLength || 5;
+        parsed.ghuslChecked = parsed.ghuslChecked || [];
+        return parsed;
+      }
+    } catch (e) {
+      console.warn("Could not read saved data, starting fresh.", e);
+    }
+    return {
+      logs: {},
+      settings: { avgCycleLength: 28, avgPeriodLength: 5 },
+      ghuslChecked: []
+    };
+  }
+
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+  }
+
+  /* ---------------------------------------------------------
+     STATE
+  --------------------------------------------------------- */
+  var state = {
+    data: loadData(),
+    viewDate: new Date(),          // month currently displayed
+    selectedDateKey: null,         // key for the day sheet
+    activeView: "calendar"
+  };
+
+  /* ---------------------------------------------------------
+     DATE HELPERS  (all local time, no UTC drift)
+  --------------------------------------------------------- */
+  function pad2(n) { return n < 10 ? "0" + n : "" + n; }
+
+  function dateKey(d) {
+    return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+  }
+
+  function keyToDate(key) {
+    var parts = key.split("-");
+    return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+  }
+
+  function addDays(d, n) {
+    var copy = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    copy.setDate(copy.getDate() + n);
+    return copy;
+  }
+
+  function diffInDays(a, b) {
+    var msPerDay = 24 * 60 * 60 * 1000;
+    var utcA = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+    var utcB = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+    return Math.round((utcB - utcA) / msPerDay);
+  }
+
+  function isSameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+  }
+
+  var MONTH_NAMES = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+  var WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+  function formatFriendly(d) {
+    return WEEKDAY_NAMES[d.getDay()] + ", " + MONTH_NAMES[d.getMonth()] + " " + d.getDate();
+  }
+
+  function formatShort(d) {
+    return MONTH_NAMES[d.getMonth()].slice(0, 3) + " " + d.getDate();
+  }
+
+  /* ---------------------------------------------------------
+     CYCLE MATH
+  --------------------------------------------------------- */
+  // Return sorted array of Date objects that are "period start" days
+  // (a period day where the previous day was not logged as a period day)
+  function getPeriodStarts() {
+    var periodKeys = Object.keys(state.data.logs)
+      .filter(function (k) { return state.data.logs[k].period; })
+      .sort();
+    var starts = [];
+    periodKeys.forEach(function (k) {
+      var d = keyToDate(k);
+      var prevKey = dateKey(addDays(d, -1));
+      if (periodKeys.indexOf(prevKey) === -1) {
+        starts.push(d);
+      }
+    });
+    return starts;
+  }
+
+  // Group period days into episodes: [{start, end, length}]
+  function getPeriodEpisodes() {
+    var periodKeys = Object.keys(state.data.logs)
+      .filter(function (k) { return state.data.logs[k].period; })
+      .sort();
+    var episodes = [];
+    var current = null;
+    periodKeys.forEach(function (k) {
+      var d = keyToDate(k);
+      if (current && diffInDays(current.end, d) === 1) {
+        current.end = d;
+        current.length += 1;
+      } else {
+        if (current) episodes.push(current);
+        current = { start: d, end: d, length: 1 };
+      }
+    });
+    if (current) episodes.push(current);
+    return episodes;
+  }
+
+  function computeAverageCycleLength() {
+    var starts = getPeriodStarts();
+    if (starts.length < 2) return state.data.settings.avgCycleLength || 28;
+    var lengths = [];
+    for (var i = 1; i < starts.length; i++) {
+      lengths.push(diffInDays(starts[i - 1], starts[i]));
+    }
+    var recent = lengths.slice(Math.max(0, lengths.length - 6));
+    var sum = recent.reduce(function (a, b) { return a + b; }, 0);
+    var avg = Math.round(sum / recent.length);
+    if (avg < 18 || avg > 60) return state.data.settings.avgCycleLength || 28;
+    return avg;
+  }
+
+  function computeAveragePeriodLength() {
+    var episodes = getPeriodEpisodes();
+    if (episodes.length === 0) return state.data.settings.avgPeriodLength || 5;
+    var recent = episodes.slice(Math.max(0, episodes.length - 6));
+    var sum = recent.reduce(function (a, b) { return a + b.length; }, 0);
+    return Math.max(1, Math.round(sum / recent.length));
+  }
+
+  function getLastPeriodStart() {
+    var starts = getPeriodStarts();
+    if (starts.length === 0) return null;
+    return starts[starts.length - 1];
+  }
+
+  function getPrediction() {
+    var lastStart = getLastPeriodStart();
+    var avgCycle = computeAverageCycleLength();
+    var avgPeriod = computeAveragePeriodLength();
+    if (!lastStart) {
+      return { nextStart: null, ovulation: null, fertileStart: null, fertileEnd: null, avgCycle: avgCycle, avgPeriod: avgPeriod };
+    }
+    var nextStart = addDays(lastStart, avgCycle);
+    var ovulation = addDays(nextStart, -14);
+    var fertileStart = addDays(ovulation, -5);
+    var fertileEnd = addDays(ovulation, 1);
+    return {
+      nextStart: nextStart,
+      nextEnd: addDays(nextStart, avgPeriod - 1),
+      ovulation: ovulation,
+      fertileStart: fertileStart,
+      fertileEnd: fertileEnd,
+      avgCycle: avgCycle,
+      avgPeriod: avgPeriod
+    };
+  }
+
+  /* ---------------------------------------------------------
+     RENDER: INSIGHT CARD
+  --------------------------------------------------------- */
+  function renderInsight() {
+    var today = new Date();
+    var prediction = getPrediction();
+    var lastStart = getLastPeriodStart();
+
+    document.getElementById("statAvgCycle").textContent = prediction.avgCycle + "d";
+    document.getElementById("statAvgPeriod").textContent = prediction.avgPeriod + "d";
+
+    if (!lastStart) {
+      document.getElementById("insightTop").textContent = "Welcome";
+      document.getElementById("insightMain").textContent = "Let's get started";
+      document.getElementById("insightSub").textContent = "Tap a date on the calendar and mark your first period day.";
+      document.getElementById("statNextPeriod").textContent = "--";
+      return;
+    }
+
+    var todayLog = state.data.logs[dateKey(today)];
+    var isOnPeriodNow = !!(todayLog && todayLog.period);
+
+    if (isOnPeriodNow) {
+      var episodes = getPeriodEpisodes();
+      var currentEpisode = episodes[episodes.length - 1];
+      var dayNum = diffInDays(currentEpisode.start, today) + 1;
+      document.getElementById("insightTop").textContent = "On your period";
+      document.getElementById("insightMain").textContent = "Day " + dayNum;
+      document.getElementById("insightSub").textContent = "Be gentle with yourself today.";
+    } else {
+      var cycleDayNum = diffInDays(lastStart, today) + 1;
+      document.getElementById("insightTop").textContent = "Cycle day";
+      document.getElementById("insightMain").textContent = "Day " + cycleDayNum;
+      var daysUntil = diffInDays(today, prediction.nextStart);
+      if (daysUntil >= 0 && daysUntil <= 3) {
+        document.getElementById("insightSub").textContent = "Your period may be arriving very soon.";
+      } else if (today >= prediction.fertileStart && today <= prediction.fertileEnd) {
+        document.getElementById("insightSub").textContent = "You are in your predicted fertile window.";
+      } else {
+        document.getElementById("insightSub").textContent = "Everything looks on track.";
+      }
+    }
+
+    var daysUntilNext = diffInDays(today, prediction.nextStart);
+    if (daysUntilNext < 0) {
+      document.getElementById("statNextPeriod").textContent = "due";
+    } else if (daysUntilNext === 0) {
+      document.getElementById("statNextPeriod").textContent = "today";
+    } else {
+      document.getElementById("statNextPeriod").textContent = daysUntilNext + "d";
+    }
+  }
+
+  /* ---------------------------------------------------------
+     RENDER: CALENDAR
+  --------------------------------------------------------- */
+  function renderCalendar() {
+    var year = state.viewDate.getFullYear();
+    var month = state.viewDate.getMonth();
+    document.getElementById("calMonthLabel").textContent = MONTH_NAMES[month] + " " + year;
+
+    var grid = document.getElementById("calGrid");
+    grid.innerHTML = "";
+
+    var firstOfMonth = new Date(year, month, 1);
+    var startWeekday = firstOfMonth.getDay();
+    var daysInMonth = new Date(year, month + 1, 0).getDate();
+    var today = new Date();
+    var prediction = getPrediction();
+
+    // leading blanks
+    for (var i = 0; i < startWeekday; i++) {
+      var blank = document.createElement("div");
+      blank.className = "cal-day empty";
+      grid.appendChild(blank);
+    }
+
+    for (var day = 1; day <= daysInMonth; day++) {
+      var d = new Date(year, month, day);
+      var key = dateKey(d);
+      var log = state.data.logs[key];
+
+      var btn = document.createElement("button");
+      btn.className = "cal-day";
+      btn.setAttribute("data-key", key);
+      btn.setAttribute("aria-label", formatFriendly(d));
+
+      var fill = document.createElement("span");
+      fill.className = "day-fill";
+      btn.appendChild(fill);
+
+      var label = document.createElement("span");
+      label.textContent = day;
+      label.style.position = "relative";
+      btn.appendChild(label);
+
+      if (isSameDay(d, today)) btn.classList.add("today");
+
+      var isPredictedPeriod = prediction.nextStart && d >= prediction.nextStart && d <= prediction.nextEnd;
+      var isFertile = prediction.fertileStart && d >= prediction.fertileStart && d <= prediction.fertileEnd;
+
+      if (log && log.period) {
+        btn.classList.add("period");
+      } else if (isPredictedPeriod && !log) {
+        btn.classList.add("predicted-period");
+      } else if (isFertile) {
+        btn.classList.add("fertile");
+      }
+
+      if (log && log.symptoms && log.symptoms.length > 0 && !log.period) {
+        btn.classList.add("symptom-only");
+      }
+      if (log && log.note) {
+        btn.classList.add("has-note");
+      }
+
+      grid.appendChild(btn);
+    }
+
+    document.querySelectorAll(".cal-day[data-key]").forEach(function (el) {
+      el.addEventListener("click", function () {
+        openDaySheet(el.getAttribute("data-key"));
+      });
+    });
+  }
+
+  /* ---------------------------------------------------------
+     RENDER: RECENT LOGS
+  --------------------------------------------------------- */
+  function renderRecentLogs() {
+    var container = document.getElementById("recentLogsList");
+    var keys = Object.keys(state.data.logs).sort().reverse().slice(0, 8);
+
+    if (keys.length === 0) {
+      container.innerHTML = '<div class="empty-state">No logs yet. Tap any date on the calendar to add one.</div>';
+      return;
+    }
+
+    container.innerHTML = "";
+    keys.forEach(function (key) {
+      var log = state.data.logs[key];
+      var d = keyToDate(key);
+      var entry = document.createElement("div");
+      entry.className = "log-entry";
+
+      var dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.background = log.period ? "var(--blush-dark)" : "var(--olive)";
+      entry.appendChild(dot);
+
+      var info = document.createElement("div");
+      info.className = "info";
+
+      var dateStr = document.createElement("div");
+      dateStr.className = "date-str";
+      dateStr.textContent = formatFriendly(d);
+      info.appendChild(dateStr);
+
+      var metaParts = [];
+      if (log.period) metaParts.push("Period day");
+      if (log.symptoms && log.symptoms.length) metaParts.push(log.symptoms.join(", "));
+      if (log.note) metaParts.push(log.note);
+      var meta = document.createElement("div");
+      meta.className = "meta";
+      meta.textContent = metaParts.length ? metaParts.join(" | ") : "Logged";
+      info.appendChild(meta);
+
+      entry.appendChild(info);
+      entry.addEventListener("click", function () { openDaySheet(key); });
+      container.appendChild(entry);
+    });
+  }
+
+  /* ---------------------------------------------------------
+     DAY SHEET (log period / symptoms / notes)
+  --------------------------------------------------------- */
+  var sheet = document.getElementById("daySheet");
+  var sheetBackdrop = document.getElementById("daySheetBackdrop");
+  var pendingSymptoms = [];
+
+  function openDaySheet(key) {
+    state.selectedDateKey = key;
+    var d = keyToDate(key);
+    var log = state.data.logs[key] || { period: false, symptoms: [], note: "" };
+    pendingSymptoms = log.symptoms ? log.symptoms.slice() : [];
+
+    document.getElementById("sheetTitle").textContent = formatFriendly(d);
+    document.getElementById("sheetSubtitle").textContent = "Log how this day is going.";
+    document.getElementById("periodToggle").checked = !!log.period;
+    document.getElementById("noteInput").value = log.note || "";
+
+    renderSymptomChips();
+    sheet.classList.add("open");
+    sheetBackdrop.classList.add("open");
+  }
+
+  function closeDaySheet() {
+    sheet.classList.remove("open");
+    sheetBackdrop.classList.remove("open");
+  }
+
+  function renderSymptomChips() {
+    var wrap = document.getElementById("symptomChips");
+    wrap.innerHTML = "";
+    SYMPTOM_LIST.forEach(function (symptom) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip" + (pendingSymptoms.indexOf(symptom) !== -1 ? " selected" : "");
+      chip.textContent = symptom;
+      chip.addEventListener("click", function () {
+        var idx = pendingSymptoms.indexOf(symptom);
+        if (idx === -1) {
+          pendingSymptoms.push(symptom);
+        } else {
+          pendingSymptoms.splice(idx, 1);
+        }
+        renderSymptomChips();
+      });
+      wrap.appendChild(chip);
+    });
+  }
+
+  document.getElementById("saveDayBtn").addEventListener("click", function () {
+    var key = state.selectedDateKey;
+    var isPeriod = document.getElementById("periodToggle").checked;
+    var note = document.getElementById("noteInput").value.trim();
+
+    if (!isPeriod && pendingSymptoms.length === 0 && !note) {
+      delete state.data.logs[key];
+    } else {
+      state.data.logs[key] = {
+        period: isPeriod,
+        symptoms: pendingSymptoms.slice(),
+        note: note
+      };
+    }
+    saveData();
+    closeDaySheet();
+    refreshAll();
+    showToast("Day saved");
+  });
+
+  document.getElementById("clearDayBtn").addEventListener("click", function () {
+    var key = state.selectedDateKey;
+    delete state.data.logs[key];
+    saveData();
+    closeDaySheet();
+    refreshAll();
+    showToast("Day cleared");
+  });
+
+  sheetBackdrop.addEventListener("click", closeDaySheet);
+
+  /* ---------------------------------------------------------
+     SETTINGS SHEET
+  --------------------------------------------------------- */
+  var settingsSheet = document.getElementById("settingsSheet");
+  var settingsBackdrop = document.getElementById("settingsSheetBackdrop");
+
+  document.getElementById("openSettingsBtn").addEventListener("click", function () {
+    document.getElementById("avgCycleInput").value = computeAverageCycleLength();
+    document.getElementById("avgPeriodInput").value = computeAveragePeriodLength();
+    settingsSheet.classList.add("open");
+    settingsBackdrop.classList.add("open");
+  });
+
+  function closeSettingsSheet() {
+    settingsSheet.classList.remove("open");
+    settingsBackdrop.classList.remove("open");
+  }
+  settingsBackdrop.addEventListener("click", closeSettingsSheet);
+
+  document.getElementById("saveSettingsBtn").addEventListener("click", function () {
+    var cycleVal = parseInt(document.getElementById("avgCycleInput").value, 10);
+    var periodVal = parseInt(document.getElementById("avgPeriodInput").value, 10);
+    if (cycleVal && cycleVal >= 15 && cycleVal <= 60) {
+      state.data.settings.avgCycleLength = cycleVal;
+    }
+    if (periodVal && periodVal >= 1 && periodVal <= 14) {
+      state.data.settings.avgPeriodLength = periodVal;
+    }
+    saveData();
+    closeSettingsSheet();
+    refreshAll();
+    showToast("Settings saved");
+  });
+
+  document.getElementById("clearAllDataBtn").addEventListener("click", function () {
+    var confirmed = window.confirm("This will erase all logs, settings, and checklist progress from this device. This cannot be undone. Continue?");
+    if (!confirmed) return;
+    state.data = { logs: {}, settings: { avgCycleLength: 28, avgPeriodLength: 5 }, ghuslChecked: [] };
+    saveData();
+    closeSettingsSheet();
+    refreshAll();
+    showToast("All data erased");
+  });
+
+  /* ---------------------------------------------------------
+     GHUSL CHECKLIST
+  --------------------------------------------------------- */
+  function renderGhusl() {
+    var list = document.getElementById("ghuslStepsList");
+    list.innerHTML = "";
+    var checked = state.data.ghuslChecked || [];
+
+    GHUSL_STEPS.forEach(function (step, index) {
+      var isChecked = checked.indexOf(index) !== -1;
+      var row = document.createElement("div");
+      row.className = "ghusl-step" + (isChecked ? " checked" : "");
+
+      var check = document.createElement("div");
+      check.className = "step-check";
+      check.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+      var text = document.createElement("div");
+      text.className = "step-text";
+      var title = document.createElement("div");
+      title.className = "step-title";
+      title.textContent = step.title;
+      if (step.sunnah) {
+        var badge = document.createElement("span");
+        badge.className = "sunnah-badge";
+        badge.textContent = "Sunnah";
+        title.appendChild(badge);
+      }
+      var desc = document.createElement("div");
+      desc.className = "step-desc";
+      desc.textContent = step.desc;
+      text.appendChild(title);
+      text.appendChild(desc);
+
+      if (step.dua) {
+        var duaBox = document.createElement("div");
+        duaBox.className = "dua-box";
+        var arabic = document.createElement("div");
+        arabic.className = "dua-arabic";
+        arabic.textContent = step.dua.arabic;
+        var meaning = document.createElement("div");
+        meaning.className = "dua-meaning";
+        meaning.textContent = step.dua.meaning;
+        duaBox.appendChild(arabic);
+        duaBox.appendChild(meaning);
+        text.appendChild(duaBox);
+      }
+
+      row.appendChild(check);
+      row.appendChild(text);
+
+      row.addEventListener("click", function () {
+        var idx = state.data.ghuslChecked.indexOf(index);
+        if (idx === -1) {
+          state.data.ghuslChecked.push(index);
+        } else {
+          state.data.ghuslChecked.splice(idx, 1);
+        }
+        saveData();
+        renderGhusl();
+      });
+
+      list.appendChild(row);
+    });
+
+    var pct = Math.round((checked.length / GHUSL_STEPS.length) * 100);
+    document.getElementById("ghuslProgressFill").style.width = pct + "%";
+    document.getElementById("ghuslDoneBanner").classList.toggle("show", checked.length === GHUSL_STEPS.length);
+  }
+
+  document.getElementById("resetGhuslBtn").addEventListener("click", function () {
+    state.data.ghuslChecked = [];
+    saveData();
+    renderGhusl();
+    showToast("Checklist reset");
+  });
+
+  /* ---------------------------------------------------------
+     WUDHU GUIDE (informational step by step, not a tracked checklist)
+  --------------------------------------------------------- */
+  function renderWudhu() {
+    var list = document.getElementById("wudhuStepsList");
+    list.innerHTML = "";
+
+    WUDHU_STEPS.forEach(function (step, index) {
+      var row = document.createElement("div");
+      row.className = "ghusl-step";
+
+      var number = document.createElement("div");
+      number.className = "step-number";
+      number.textContent = index + 1;
+
+      var text = document.createElement("div");
+      text.className = "step-text";
+      var title = document.createElement("div");
+      title.className = "step-title";
+      title.textContent = step.title;
+      var desc = document.createElement("div");
+      desc.className = "step-desc";
+      desc.textContent = step.desc;
+      text.appendChild(title);
+      text.appendChild(desc);
+
+      row.appendChild(number);
+      row.appendChild(text);
+      list.appendChild(row);
+    });
+  }
+
+  /* ---------------------------------------------------------
+     LEARN ACCORDION
+  --------------------------------------------------------- */
+  function renderAccordion() {
+    var list = document.getElementById("accordionList");
+    list.innerHTML = "";
+
+    LEARN_SECTIONS.forEach(function (section, index) {
+      var item = document.createElement("div");
+      item.className = "accordion-item";
+
+      var head = document.createElement("button");
+      head.className = "accordion-head";
+      head.innerHTML =
+        '<span class="accordion-icon-wrap"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' + section.icon + '"></path></svg></span>' +
+        '<span class="a-title">' + section.title + '</span>' +
+        '<svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
+      var body = document.createElement("div");
+      body.className = "accordion-body";
+      var bodyInner = document.createElement("div");
+      bodyInner.className = "accordion-body-inner";
+      bodyInner.innerHTML = section.body;
+      body.appendChild(bodyInner);
+
+      head.addEventListener("click", function () {
+        var willOpen = !item.classList.contains("open");
+        list.querySelectorAll(".accordion-item").forEach(function (other) {
+          other.classList.remove("open");
+          other.querySelector(".accordion-body").style.maxHeight = null;
+        });
+        if (willOpen) {
+          item.classList.add("open");
+          body.style.maxHeight = body.scrollHeight + "px";
+        }
+      });
+
+      item.appendChild(head);
+      item.appendChild(body);
+      list.appendChild(item);
+    });
+
+    var noteBox = document.createElement("div");
+    noteBox.className = "note-box";
+    noteBox.innerHTML = "<strong>A gentle reminder</strong>This app is here to help you get to know your own body a little better. It is not a substitute for advice from a parent, guardian, or doctor, and it is always okay to ask questions.";
+    list.appendChild(noteBox);
+  }
+
+  /* ---------------------------------------------------------
+     TABS
+  --------------------------------------------------------- */
+  document.querySelectorAll(".tab-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var target = btn.getAttribute("data-view");
+      state.activeView = target;
+      document.querySelectorAll(".tab-btn").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
+      document.getElementById("view-" + target).classList.add("active");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+
+  /* ---------------------------------------------------------
+     CALENDAR NAV
+  --------------------------------------------------------- */
+  document.getElementById("prevMonthBtn").addEventListener("click", function () {
+    state.viewDate = new Date(state.viewDate.getFullYear(), state.viewDate.getMonth() - 1, 1);
+    renderCalendar();
+  });
+  document.getElementById("nextMonthBtn").addEventListener("click", function () {
+    state.viewDate = new Date(state.viewDate.getFullYear(), state.viewDate.getMonth() + 1, 1);
+    renderCalendar();
+  });
+  document.getElementById("jumpTodayBtn").addEventListener("click", function () {
+    state.viewDate = new Date();
+    renderCalendar();
+  });
+
+  /* ---------------------------------------------------------
+     TOAST
+  --------------------------------------------------------- */
+  var toastTimer = null;
+  function showToast(message) {
+    var toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toast.classList.remove("show");
+    }, 1800);
+  }
+
+  /* ---------------------------------------------------------
+     REFRESH / INIT
+  --------------------------------------------------------- */
+  function refreshAll() {
+    renderInsight();
+    renderCalendar();
+    renderRecentLogs();
+    renderGhusl();
+  }
+
+  function init() {
+    state.viewDate = new Date();
+    refreshAll();
+    renderWudhu();
+    renderAccordion();
+
+    // Lightweight installability: build a manifest on the fly so this
+    // still works as a single index.html file with no extra assets.
+    try {
+      var manifest = {
+        name: "My Cycle Tracker",
+        short_name: "Cycle Tracker",
+        start_url: ".",
+        display: "standalone",
+        background_color: "#FBF7F2",
+        theme_color: "#FBF7F2",
+        icons: [{
+          src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%237C8A64'/%3E%3Cpath d='M50 78 V42' stroke='%23FBF7F2' stroke-width='4' stroke-linecap='round'/%3E%3Cellipse cx='38' cy='40' rx='14' ry='9' fill='%23FBF7F2' transform='rotate(-30 38 40)'/%3E%3Cellipse cx='62' cy='34' rx='14' ry='9' fill='%23FBF7F2' transform='rotate(25 62 34)'/%3E%3Cellipse cx='50' cy='22' rx='13' ry='8.5' fill='%23FBF7F2' transform='rotate(-4 50 22)'/%3E%3C/svg%3E",
+          sizes: "100x100",
+          type: "image/svg+xml"
+        }]
+      };
+      var blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = url;
+      document.head.appendChild(link);
+    } catch (e) {
+      // Manifest is a nice-to-have, safe to skip if unsupported.
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>
